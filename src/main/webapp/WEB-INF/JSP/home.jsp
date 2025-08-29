@@ -55,6 +55,7 @@
 <body>
     <div class="container">
         <h1>Welcome to ${appName}</h1>
+        <h3>Welcome, ${username}!</h3>
         <a href="/library/display" class="button">View Library Books</a>
     </div>
 </body>

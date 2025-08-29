@@ -4,7 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Library Books – Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+    rel="stylesheet"/>
   <style>
     body {
       margin: 0;
@@ -33,6 +35,8 @@
       top: 20px;
       right: 20px;
       z-index: 999;
+      display: flex;
+      gap: 10px;
     }
     .top-right-button a,
     .add-button a {
@@ -43,8 +47,8 @@
       border-radius: 30px;
       text-decoration: none;
       box-shadow: 0 4px 12px rgba(37,99,235,0.5);
-      display: inline-block;
       transition: 0.3s ease;
+      display: inline-block;
     }
     .top-right-button a:hover,
     .add-button a:hover {
@@ -162,7 +166,9 @@
         display: block;
         overflow-x: auto;
       }
-      thead { display: none; }
+      thead {
+        display: none;
+      }
       tbody tr {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -193,15 +199,18 @@
 
   <div class="top-right-button">
     <a href="/library/home">Back to Home</a>
+    <a href="/logout">Logout</a>
   </div>
 
   <div class="container">
     <h2>Library Book List</h2>
 
     <div class="search-filter">
-      <input type="text"
-             placeholder="Search by Name, Author, Status..."
-             onkeyup="filterBooks(this.value)" />
+      <input
+        type="text"
+        placeholder="Search by Name, Author, Status..."
+        onkeyup="filterBooks(this.value)"
+      />
     </div>
 
     <table aria-label="Library book list">
@@ -224,7 +233,7 @@
             <td data-label="Sr. No.">${loop.index + 1}</td>
             <td data-label="Name">${book.name}</td>
             <td data-label="Author">${book.author}</td>
-            <td data-label="Price"> ${book.price}</td>
+            <td data-label="Price">${book.price}</td>
             <td data-label="Status">
               <span class="status ${book.status == 'Available' ? 'available' : 'borrowed'}">
                 ${book.status}
@@ -250,15 +259,29 @@
               </c:if>
             </td>
             <td data-label="Actions" class="action-links">
-              <a href="/library/editBook/${book.id}" class="edit" title="Edit Book">Edit</a>
-              <a href="/library/deleteBook/${book.id}" class="delete"
-                 onclick="return confirm('Are you sure you want to delete this book?');"
-                 title="Delete Book">Delete</a>
+              <!-- EDIT & DELETE only for ADMIN -->
+              <c:if test="${sessionScope.loggedInUser.role == 'ADMIN'}">
+                <a href="/library/editBook/${book.id}" class="edit" title="Edit Book">
+                  Edit
+                </a>
+                <a href="/library/deleteBook/${book.id}"
+                   class="delete"
+                   onclick="return confirm('Are you sure you want to delete this book?');"
+                   title="Delete Book">
+                  Delete
+                </a>
+              </c:if>
+
+              <!-- BORROW/RETURN available to all -->
               <c:if test="${book.status == 'Available'}">
-                <a href="/library/borrowBookForm/${book.id}" class="borrow" title="Borrow Book">Borrow</a>
+                <a href="/library/borrowBookForm/${book.id}" class="borrow" title="Borrow Book">
+                  Borrow
+                </a>
               </c:if>
               <c:if test="${book.status == 'Borrowed'}">
-                <a href="/library/returnBook/${book.id}" class="return" title="Return Book">Return</a>
+                <a href="/library/returnBook/${book.id}" class="return" title="Return Book">
+                  Return
+                </a>
               </c:if>
             </td>
           </tr>
@@ -275,37 +298,26 @@
 
   <script>
     const rowsPerPage = 5;
-    let currentPage = 1;
-
+    let currentPage = 1;  
     function filterBooks(query) {
       query = query.toLowerCase();
       const rows = document.querySelectorAll('#book-table-body tr');
       rows.forEach(row => {
-        if (row.textContent.toLowerCase().includes(query)) {
-          row.classList.add('visible');
-        } else {
-          row.classList.remove('visible');
-        }
+        row.classList.toggle('visible', row.textContent.toLowerCase().includes(query));
       });
       currentPage = 1;
       paginateTable();
     }
-
     function paginateTable() {
-      const rows = Array.from(document.querySelectorAll('#book-table-body tr'));
+      const rows = [...document.querySelectorAll('#book-table-body tr')];
       const visibleRows = rows.filter(r => r.classList.contains('visible'));
       const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
       const start = (currentPage - 1) * rowsPerPage;
       const end = start + rowsPerPage;
-
-      // Hide all, then show only current page slice
       rows.forEach(r => r.style.display = 'none');
       visibleRows.slice(start, end).forEach(r => r.style.display = '');
-
-      // Build pagination controls
       const container = document.getElementById('pagination-controls');
       container.innerHTML = '';
-
       const makeBtn = (text, disabled, active, onClick) => {
         const btn = document.createElement('button');
         btn.textContent = text;
@@ -314,28 +326,22 @@
         btn.onclick = onClick;
         return btn;
       };
-
       container.appendChild(makeBtn('Prev', currentPage === 1, false, () => {
         currentPage--; paginateTable();
       }));
-
       for (let i = 1; i <= totalPages; i++) {
         container.appendChild(makeBtn(i, false, i === currentPage, () => {
           currentPage = i; paginateTable();
         }));
       }
-
       container.appendChild(makeBtn('Next', currentPage === totalPages || totalPages === 0, false, () => {
         currentPage++; paginateTable();
       }));
     }
-
     window.addEventListener('load', () => {
-      // Initialize all rows as visible
       document.querySelectorAll('#book-table-body tr').forEach(r => r.classList.add('visible'));
       paginateTable();
     });
   </script>
-
 </body>
 </html>

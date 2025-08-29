@@ -1,7 +1,7 @@
 package com.example.springlibrary.entity;
 
-import java.time.LocalDate;
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "book_tb")
@@ -17,6 +17,7 @@ public class Book {
     private String status; // Available or Borrowed
     private LocalDate borrowedDate;
     private int borrowedForDays;
+
 
     // Getter and Setter for id
     public int getId() {
