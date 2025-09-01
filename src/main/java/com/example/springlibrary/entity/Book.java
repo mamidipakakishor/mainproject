@@ -17,6 +17,24 @@ public class Book {
     private String status; // Available or Borrowed
     private LocalDate borrowedDate;
     private int borrowedForDays;
+    
+    
+    
+    
+    
+    @ManyToOne
+    @JoinColumn(name = "borrowed_by_id")
+    private User borrowedBy;
+
+    public User getBorrowedBy() {
+        return borrowedBy;
+    }
+
+    public void setBorrowedBy(User borrowedBy) {
+        this.borrowedBy = borrowedBy;
+    }
+    
+    
 
 
     // Getter and Setter for id

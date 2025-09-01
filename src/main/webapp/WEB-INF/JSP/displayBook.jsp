@@ -225,6 +225,10 @@
           <th>Borrowed For (Days)</th>
           <th>Due Date</th>
           <th>Actions</th>
+          
+          
+          <th>Borrowed By</th>
+          
         </tr>
       </thead>
       <tbody id="book-table-body">
@@ -258,6 +262,22 @@
                 -
               </c:if>
             </td>
+            
+            
+            
+            
+            <td data-label="Borrowed By">
+  <c:choose>
+    <c:when test="${book.borrowedBy != null}">
+      ${book.borrowedBy.username}
+    </c:when>
+    <c:otherwise>-</c:otherwise>
+  </c:choose>
+</td>
+            
+            
+            
+            
             <td data-label="Actions" class="action-links">
               <!-- EDIT & DELETE only for ADMIN -->
               <c:if test="${sessionScope.loggedInUser.role == 'ADMIN'}">

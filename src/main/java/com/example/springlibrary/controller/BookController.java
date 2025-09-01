@@ -105,28 +105,102 @@ public class BookController {
         return "borrowBookForm";
     }
 
+//    @PostMapping("/borrowBook/{id}")
+//    public String borrowBook(@PathVariable int id,
+//                             @RequestParam("days") int days) {
+//        Book book = bookRepository.findById(id).orElse(null);
+//        if (book != null && "Available".equals(book.getStatus())) {
+//            book.setStatus("Borrowed");
+//            book.setBorrowedDate(LocalDate.now());
+//            book.setBorrowedForDays(days > 0 ? days : 7);
+//            bookRepository.save(book);
+//        }
+//        return "redirect:/library/display";
+//    }
+    
+    
+    
+    
     @PostMapping("/borrowBook/{id}")
     public String borrowBook(@PathVariable int id,
-                             @RequestParam("days") int days) {
+                             @RequestParam("days") int days,
+                             HttpSession session) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) {
+            return "redirect:/login";
+        }
+
         Book book = bookRepository.findById(id).orElse(null);
         if (book != null && "Available".equals(book.getStatus())) {
             book.setStatus("Borrowed");
             book.setBorrowedDate(LocalDate.now());
             book.setBorrowedForDays(days > 0 ? days : 7);
+            book.setBorrowedBy(user); // associate user
             bookRepository.save(book);
         }
         return "redirect:/library/display";
     }
+    
+    
+    
 
+//    @GetMapping("/returnBook/{id}")
+//    public String returnBook(@PathVariable int id) {
+//        Book book = bookRepository.findById(id).orElse(null);
+//        if (book != null && "Borrowed".equals(book.getStatus())) {
+//            book.setStatus("Available");
+//            book.setBorrowedDate(null);
+//            book.setBorrowedForDays(0);
+//            bookRepository.save(book);
+//        }
+//        return "redirect:/library/display";
+//    }
+    
+    
+    
+    
+//    @GetMapping("/returnBook/{id}")
+//    public String returnBook(@PathVariable int id) {
+//        Book book = bookRepository.findById(id).orElse(null);
+//        if (book != null && "Borrowed".equals(book.getStatus())) {
+//            book.setStatus("Available");
+//            book.setBorrowedDate(null);
+//            book.setBorrowedForDays(0);
+//            book.setBorrowedBy(null); // clear borrower
+//            bookRepository.save(book);
+//        }
+//        return "redirect:/library/display";
+//    }
+    
+    
+    
+    
     @GetMapping("/returnBook/{id}")
-    public String returnBook(@PathVariable int id) {
+    public String returnBook(@PathVariable int id, HttpSession session) {
+        User currentUser = (User) session.getAttribute("loggedInUser");
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
         Book book = bookRepository.findById(id).orElse(null);
-        if (book != null && "Borrowed".equals(book.getStatus())) {
+        if (book == null || !"Borrowed".equals(book.getStatus())) {
+            return "redirect:/library/display";
+        }
+
+        // Allow return only if current user is the borrower or an admin
+        if (book.getBorrowedBy() != null &&
+            (book.getBorrowedBy().getId() == currentUser.getId() || "ADMIN".equals(currentUser.getRole()))) {
+
             book.setStatus("Available");
             book.setBorrowedDate(null);
             book.setBorrowedForDays(0);
+            book.setBorrowedBy(null);
             bookRepository.save(book);
         }
+
         return "redirect:/library/display";
     }
+    
+    
+    
 }
